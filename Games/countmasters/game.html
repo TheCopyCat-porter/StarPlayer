@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF8" />
+		<script defer="defer">
+			(() => {
+				"use strict";
+				var e = {
+						678: () => {
+							window.addEventListener("blur", function () {
+								window.parent.postMessage({ type: "syncUnityData" }, "*");
+							}),
+								window.addEventListener("keydown", function (e) {
+									"Escape" === e.key &&
+										window.parent.postMessage(
+											{ type: "escapeFullscreen" },
+											"*"
+										);
+								}),
+								(window.sendDelayedMemoryUsage = function () {
+									setTimeout(() => {
+										const e =
+											null == window ? void 0 : window.performance.memory;
+										if (!e) return;
+										const {
+											totalJSHeapSize: n,
+											usedJSHeapSize: t,
+											jsHeapSizeLimit: o,
+										} = e;
+										window.parent.postMessage(
+											{
+												type: "unityMemoryUsage",
+												usageData: {
+													type: "memoryUsage",
+													totalJSHeapSize: n,
+													usedJSHeapSize: t,
+													jsHeapSizeLimit: o,
+												},
+											},
+											"*"
+										);
+									}, 1e4);
+								});
+						},
+						951: () => {
+							(() => {
+								function e(e, n) {
+									window.unityGameInstance && window.crazySDKObjectName
+										? (window.debugStub(
+												"Send message to Unity game instance",
+												e,
+												n
+										  ),
+										  window.unityGameInstance.SendMessage(
+												window.crazySDKObjectName,
+												e,
+												n
+										  ))
+										: window.debugStub(
+												"unityGameInstance or crazySDKObjectName not defined, cannot send message",
+												e,
+												n
+										  );
+								}
+								(window.stubDebugEnabled = window.location.href.includes(
+									"iframed_unity_debug=true"
+								)),
+									(window.crazySDKObjectName = null),
+									(window.oldSdkInitObject = null),
+									(window.debugStub = function (...e) {
+										window.stubDebugEnabled && console.log("[StubSDK]", ...e);
+									}),
+									window.addEventListener("message", (n) => {
+										if ("sendUnityMessage" === n.data.type) {
+											if ("InitCallback" === n.data.methodName) return;
+											window.debugStub("Got GF event", n.data),
+												e(n.data.methodName, n.data.value);
+										}
+									}),
+									(window.Crazygames = {
+										load: () => {
+											window.debugStub("Crazygames.load");
+										},
+										init: (n) => {
+											if (
+												(window.debugStub("Crazygames.init forwarded to GF", n),
+												(window.crazySDKObjectName = n.crazySDKObjectName),
+												window.parent.postMessage(
+													{ type: "window.Crazygames.init", options: n },
+													"*"
+												),
+												window.oldSdkInitObject)
+											)
+												e(
+													"InitCallback",
+													JSON.stringify(window.oldSdkInitObject)
+												);
+											else {
+												const n = {
+													gameLink:
+														"https://www.crazygames.com/game/" +
+														new URL(window.location.href).hostname.split(
+															"."
+														)[0],
+													userInfo: {
+														countryCode: "US",
+														device: { type: "desktop" },
+														os: { name: "Windows", version: "11" },
+														browser: { name: "Chrome", version: "130.0.0.0" },
+													},
+												};
+												window.debugStub(
+													"No oldSdkInitObject to send, sending temporary init object",
+													n
+												),
+													e("InitCallback", JSON.stringify(n));
+											}
+										},
+										requestAd: (e) => {
+											window.debugStub(
+												"Crazygames.requestAd forwarded to GF",
+												e
+											),
+												window.parent.postMessage(
+													{ type: "window.Crazygames.requestAd", adType: e },
+													"*"
+												);
+										},
+										happytime: () => {
+											window.debugStub("Crazygames.happytime");
+										},
+										gameplayStart: () => {
+											window.debugStub("Crazygames.gameplayStart");
+										},
+										gameplayStop: () => {
+											window.debugStub("Crazygames.gameplayStop");
+										},
+										sdkGameLoadingStart: () => {
+											window.debugStub("Crazygames.sdkGameLoadingStart");
+										},
+										sdkGameLoadingStop: () => {
+											window.debugStub("Crazygames.sdkGameLoadingStop");
+										},
+										requestInviteUrl: (e) => {
+											window.debugStub("Crazygames.requestInviteUrl", e);
+										},
+										requestBanners: (e) => {
+											window.debugStub("Crazygames.requestBanners", e),
+												console.warn(
+													"Stub SDK doesn't support banners, please migrate to the new Unity SDK"
+												);
+										},
+										screenshotReceived: () => {
+											window.debugStub("Crazygames.screenshotReceived");
+										},
+										constants: [],
+										getUnityInstance: () => {},
+									}),
+									(window.CrazySDK = {
+										init: function (e) {
+											window.debugStub("CrazySDK.init", e),
+												window.Crazygames.init(e);
+										},
+										requestAd: function (e) {
+											window.debugStub("CrazySDK.requestAd", e),
+												window.Crazygames.requestAd(e);
+										},
+									});
+							})();
+						},
+						553: () => {
+							(() => {
+								var e = Object.defineProperty,
+									n = Object.getOwnPropertySymbols,
+									t = Object.prototype.hasOwnProperty,
+									o = Object.prototype.propertyIsEnumerable,
+									r = (n, t, o) =>
+										t in n
+											? e(n, t, {
+													enumerable: !0,
+													configurable: !0,
+													writable: !0,
+													value: o,
+											  })
+											: (n[t] = o),
+									a = (e, n, t) =>
+										new Promise((o, r) => {
+											var a = (e) => {
+													try {
+														d(t.next(e));
+													} catch (e) {
+														r(e);
+													}
+												},
+												i = (e) => {
+													try {
+														d(t.throw(e));
+													} catch (e) {
+														r(e);
+													}
+												},
+												d = (e) =>
+													e.done
+														? o(e.value)
+														: Promise.resolve(e.value).then(a, i);
+											d((t = t.apply(e, n)).next());
+										});
+								function i(e) {
+									window.parent.postMessage(
+										{ type: "loadProgress", progress: e },
+										"*"
+									),
+										1 === e && window.sendDelayedMemoryUsage();
+								}
+								function d() {
+									var e;
+									document.hasFocus() ||
+										(window.debugLog("Cleaning up listener and focusing"),
+										window.focus(),
+										null == (e = window.getUnityCanvas()) ||
+											e.removeEventListener("touchstart", d));
+								}
+								(window.debugEnabled = window.location.href.includes(
+									"iframed_unity_debug=true"
+								)),
+									(window.config = null),
+									(window.unityGameInstance = null),
+									(window.canvas = null),
+									(window.debugLog = function (...e) {
+										window.debugEnabled &&
+											console.log("[IframedUnity2020]", ...e);
+									}),
+									(window.getUnityCanvas = function () {
+										return (
+											window.canvas ||
+												(window.canvas =
+													document.getElementById("unity-canvas")),
+											window.canvas
+										);
+									}),
+									window.addEventListener("message", function (e) {
+										return a(this, null, function* () {
+											switch (e.data.type) {
+												case "unity2020config":
+													window.debugLog("Got config", e.data),
+														(window.config = e.data),
+														(window.oldSdkInitObject = e.data.oldSdkInitObject);
+													break;
+												case "loadGame":
+													window.debugLog("Requested loadGame"),
+														window.loadGame();
+													break;
+												case "focusGame":
+													window.focus();
+													break;
+												case "disableGame":
+													window.unityGameInstance &&
+														window.unityGameInstance.Quit();
+											}
+										});
+									}),
+									window.addEventListener("load", function () {
+										window.parent.postMessage({ type: "unity2020ready" }, "*");
+									}),
+									(window.loadGame = function () {
+										return a(this, null, function* () {
+											if (!window.config)
+												return void console.error(
+													"[IframedUnity2020] config is missing"
+												);
+											const e = ((e, a) => {
+													for (var i in a || (a = {}))
+														t.call(a, i) && r(e, i, a[i]);
+													if (n)
+														for (var i of n(a)) o.call(a, i) && r(e, i, a[i]);
+													return e;
+												})({}, window.config.unityConfig),
+												d = new URLSearchParams(window.location.search),
+												s = "true" === d.get("isPreview"),
+												w = "true" === d.get("enableUnityCache");
+											s &&
+												!w &&
+												(yield (function () {
+													return a(this, null, function* () {
+														return new Promise((e) => {
+															const n = indexedDB.open("/idbfs");
+															(n.onsuccess = () => {
+																const t = n.result;
+																try {
+																	if (!t.objectStoreNames.contains("FILE_DATA"))
+																		return t.close(), void e();
+																	const n = t.transaction(
+																			["FILE_DATA"],
+																			"readwrite"
+																		),
+																		o = n.objectStore("FILE_DATA"),
+																		r = o.getAllKeys();
+																	(r.onsuccess = () => {
+																		r.result
+																			.filter(
+																				(e) =>
+																					"string" == typeof e &&
+																					(e.includes("/UnityCache/") ||
+																						e.includes("/Unity/"))
+																			)
+																			.forEach((e) => o.delete(e));
+																	}),
+																		(n.oncomplete = () => {
+																			t.close(), e();
+																		}),
+																		(n.onerror = () => {
+																			t.close(), e();
+																		});
+																} catch (n) {
+																	t.close(), e();
+																}
+															}),
+																(n.onerror = () => e()),
+																(n.onblocked = () => e());
+														});
+													});
+												})(),
+												yield (function () {
+													return a(this, null, function* () {
+														const e = yield caches.keys();
+														for (const n of e)
+															n.startsWith("UnityCache_") &&
+																(yield caches.delete(n),
+																window.debugLog(
+																	"Cleaned cached network requests:",
+																	n
+																));
+													});
+												})(),
+												(e.cacheControl = () => "no-store"),
+												window.debugLog("Disabling cache for preview")),
+												s ||
+													(e.cacheControl = (e) =>
+														e.includes("files.crazygames.com") ||
+														e.includes("files.dev-crazygames.be")
+															? "immutable"
+															: "must-revalidate");
+											const c = document.createElement("canvas"),
+												u = c.getContext("webgl") || c.getContext("webgl2"),
+												l =
+													u &&
+													!!u.getExtension("WEBGL_compressed_texture_astc"),
+												g = "true" === d.get("forceAstc");
+											(l || g) &&
+												e.astcDataUrl &&
+												((e.dataUrl = e.astcDataUrl),
+												window.debugLog(
+													"Using ASTC data URL for Unity game, reasons: ",
+													{ supportsAstc: l, forceAstc: g }
+												)),
+												window.config.isIos &&
+													e.max512WasmUrl &&
+													(window.debugLog(
+														"Running on iOS and max512WasmUrl is present, using it as codeUrl"
+													),
+													(e.codeUrl = e.max512WasmUrl)),
+												delete e.astcDataUrl,
+												delete e.max1024WasmUrl,
+												delete e.max512WasmUrl;
+											var y = document.createElement("script");
+											(y.type = "text/javascript"),
+												(y.onload = function () {
+													return a(this, null, function* () {
+														if (window.config && window.createUnityInstance)
+															try {
+																window.debugLog("Creating Unity instance", e),
+																	(window.unityGameInstance =
+																		yield window.createUnityInstance(
+																			window.getUnityCanvas(),
+																			e,
+																			i
+																		)),
+																	window.debugLog("Game loaded");
+															} catch (e) {
+																console.error("[IframedUnity2020] error", e),
+																	window.parent.postMessage(
+																		{ type: "unityError", error: e },
+																		"*"
+																	);
+															}
+													});
+												}),
+												(y.src = window.config.loaderOptions.unityLoaderUrl),
+												document.body.appendChild(y),
+												window.debugLog("Loading loader script", y.src);
+										});
+									}),
+									window.addEventListener("blur", () => {
+										var e;
+										window.debugLog("Adding touch start listener"),
+											null == (e = window.getUnityCanvas()) ||
+												e.addEventListener("touchstart", d);
+									});
+							})();
+						},
+						729: () => {
+							(() => {
+								const e = [
+									[
+										"exception handling has been disabled",
+										"noExceptionSupport",
+									],
+									[
+										"The browser could not allocate enough memory",
+										"failedToAllocateMemory",
+									],
+									["Out of memory", "outOfMemory"],
+									["out of memory", "outOfMemory"],
+									["abort", "AbortedError"],
+									["NotAllowedError", "NotAllowedError"],
+									["TypeError", "TypeError"],
+									["ScriptError", "ScriptError"],
+									["NotSupportedError", "NotSupportedError"],
+									["RuntimeError", "RuntimeError"],
+									["RangeError", "RangeError"],
+									["InvalidStateError", "InvalidStateError"],
+									["SDK Not initialized", "SDKNotInitializedError"],
+									["NetworkError", "NetworkError"],
+									["DataCloneError", "DataCloneError"],
+									["ReferenceError", "ReferenceError"],
+									["SecurityError", "SecurityError"],
+									["InvalidAccessError", "InvalidAccessError"],
+									["ChunkLoadError", "ChunkLoadError"],
+									["QuotaExceededError", "QuotaExceededError"],
+									["TimeoutError", "TimeoutError"],
+									["NotFoundError", "NotFoundError"],
+									["NS_ERROR_", "NSError"],
+									[
+										"An error occurred running the Unity content on this page",
+										"unknown",
+									],
+								];
+								let n = !1;
+								const t = (t, o) => {
+									if (n) return !0;
+									let r;
+									if (((n = !0), "string" != typeof t)) return (n = !1), !1;
+									for (let n of e)
+										if (t.includes(n[0])) {
+											r = n[1];
+											break;
+										}
+									return r
+										? (window.parent.postMessage(
+												{
+													type: "unityCrashError",
+													error: r,
+													errorMessage: `${t}`,
+													origin: o,
+												},
+												"*"
+										  ),
+										  !0)
+										: ((n = !1), !1);
+								};
+								var o;
+								(o = window.alert),
+									(window.alert = function () {
+										if (!t(arguments[0] || "", "alert"))
+											return o.apply(this, arguments);
+										window.parent.postMessage(
+											{ type: "unityCrashModalOpen" },
+											"*"
+										);
+									}),
+									(function (e) {
+										console.error = function () {
+											return (
+												t(arguments[0] || "", "console"),
+												e.apply(this, arguments)
+											);
+										};
+									})(console.error);
+							})();
+						},
+					},
+					n = {};
+				function t(o) {
+					var r = n[o];
+					if (void 0 !== r) return r.exports;
+					var a = (n[o] = { exports: {} });
+					return e[o](a, a.exports, t), a.exports;
+				}
+				t(951), t(678), t(729), t(553);
+			})();
+			//# sourceMappingURL=unity2020.js.map
+		</script>
+	</head>
+	<body style="margin: 0; padding: 0">
+		<canvas
+			id="unity-canvas"
+			style="
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				outline: none;
+			"
+		></canvas>
+	</body>
+</html>

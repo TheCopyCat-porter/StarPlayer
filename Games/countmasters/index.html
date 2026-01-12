@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body style="margin: 0; height: 100vh">
+		<iframe src="game.html" width="100%" height="100%"> </iframe>
+	</body>
+	<script defer>
+		(() => {
+			const iframe = document.querySelector("iframe");
+			if (!iframe) {
+				return;
+			}
+
+			const postToIframe = (msg, delay = 0) => {
+				setTimeout(() => {
+					try {
+						iframe.contentWindow.postMessage(msg, "*");
+					} catch (err) {
+						console.log("postMessage failed:", err, msg);
+					}
+				}, delay);
+			};
+
+			window.addEventListener("message", (ev) => {
+				if (ev.source === iframe.contentWindow) {
+				} else {
+				}
+			});
+
+			if (
+				iframe.contentWindow &&
+				iframe.contentDocument.readyState !== "loading"
+			) {
+			} else {
+				iframe.addEventListener("load", () => {}, { once: true });
+			}
+
+			const options = {
+				loader: "unity2022",
+				loaderOptions: {
+					showProgress: true,
+					unityLoaderUrl: "files/bb0d9ecdb05db3e84da20bd14a4f84dc.loader.js",
+					unityConfigOptions: {
+						codeUrl: "files/7805ef551878df264897388db901cd8b.wasm",
+						dataUrl: "files/fc3d0e2f3ede6b21d68d1bdcf09897f0.data",
+						frameworkUrl: "files/61c3111a617f5704892207f850018243.framework.js",
+						streamingAssetsUrl:
+							"https://files.crazygames.com/count-masters-stickman-games/14/StreamingAssets",
+					},
+				},
+				gameName: "Count Masters: Stickman Games",
+				gameSlug: "count-masters-stickman-games",
+			};
+
+			postToIframe({ type: "unity2020ready" }, 100);
+			postToIframe(
+				{
+					type: "unity2020config",
+					unityConfig: options.loaderOptions.unityConfigOptions,
+					loaderOptions: options.loaderOptions,
+					oldSdkInitObject: {
+						fake: true,
+						note: "stub init object for Unity2020 test",
+					},
+				},
+				300
+			);
+			postToIframe({ type: "loadGame" }, 800);
+		})();
+	</script>
+</html>
