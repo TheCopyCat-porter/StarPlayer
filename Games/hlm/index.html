@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>HOTLINE MIAMI</title>
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+				width: 100%;
+				background: #000;
+				overflow: hidden;
+				font-family: "Press Start 2P", monospace;
+			}
+
+			canvas {
+				display: block;
+				width: 100vw;
+				height: 100vh;
+				image-rendering: pixelated;
+			}
+
+			#credits {
+				position: absolute;
+				bottom: 8px;
+				right: 12px;
+				font-size: 24px;
+				color: #00ffe5;
+				text-shadow: 1px 1px #ff0080;
+				user-select: none;
+				z-index: 5;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="1920" height="1080"></canvas>
+		<div id="credits" data-credit="truffled-98c">
+			port by 98corbins — truffled.lol
+		</div>
+		<script src="html5game/HotlineMiami.js"></script>
+	</body>
+</html>

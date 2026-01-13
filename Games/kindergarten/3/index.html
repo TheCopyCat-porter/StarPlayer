@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Unity WebGL Player | Kindergarten3</title>
+	</head>
+	<body style="text-align: center; padding: 0; border: 0; margin: 0">
+		<canvas
+			id="unity-canvas"
+			tabindex="-1"
+			style="width: 95%; height: 95%; background: #000000"
+		></canvas>
+		<script src="Build/Kindergarten3PortTemp.loader.js"></script>
+		<script>
+			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+				// Mobile device style: fill the whole browser client area with the game canvas:
+				var meta = document.createElement("meta");
+				meta.name = "viewport";
+				meta.content =
+					"width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+				document.getElementsByTagName("head")[0].appendChild(meta);
+
+				var canvas = document.querySelector("#unity-canvas");
+
+				document.body.style.textAlign = "left";
+			}
+
+			createUnityInstance(document.querySelector("#unity-canvas"), {
+				dataUrl: "Build/Kindergarten3PortTemp.data",
+				frameworkUrl: "Build/Kindergarten3PortTemp.framework.js",
+				codeUrl: "Build/Kindergarten3PortTemp.wasm",
+				streamingAssetsUrl: "StreamingAssets",
+				companyName: "Con Man Games",
+				productName: "Kindergarten3",
+				productVersion: "0.01",
+				// matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+				// devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+			});
+		</script>
+	</body>
+</html>

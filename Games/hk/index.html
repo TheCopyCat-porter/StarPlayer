@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Unity WebGL Player | Hollow Knight</title>
+		<link rel="shortcut icon" href="TemplateData/favicon.ico" />
+		<link rel="stylesheet" href="TemplateData/style.css" />
+	</head>
+	<body style="overflow: hidden">
+		<div
+			id="loading-text"
+			style="
+				color: white;
+				font-family: Inter, sans-serif;
+				font-size: 48px;
+				text-align: center;
+				margin-top: 20px;
+			"
+		>
+			Parts downloaded (N/A)
+		</div>
+		<div id="unity-container" class="unity-desktop">
+			<canvas id="unity-canvas"></canvas>
+		</div>
+		<script>
+			var container = document.querySelector("#unity-container");
+			var canvas = document.querySelector("#unity-canvas");
+
+			function formatMB(bytes) {
+				return (bytes / (1024 * 1024)).toFixed(2);
+			}
+
+			async function mergeFiles(fileParts, concurrency = 5) {
+				const results = new Array(fileParts.length);
+				let completedBytes = 0;
+				let totalBytes = 0;
+				await Promise.all(
+					fileParts.map(async (url) => {
+						const head = await fetch(url, { method: "HEAD" });
+						const len = parseInt(head.headers.get("Content-Length") || "0", 10);
+						totalBytes += len;
+					})
+				);
+
+				const loadingText = document.getElementById("loading-text");
+				loadingText.textContent = `Downloaded 0.00 / ${formatMB(
+					totalBytes
+				)} MB`;
+
+				async function fetchPart(index) {
+					const response = await fetch(fileParts[index]);
+					const reader = response.body.getReader();
+					const contentLength = parseInt(
+						response.headers.get("Content-Length") || "0",
+						10
+					);
+					let received = 0;
+					const chunks = [];
+
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						chunks.push(value);
+						received += value.length;
+						completedBytes += value.length;
+						loadingText.textContent = `Downloaded ${formatMB(
+							completedBytes
+						)} / ${formatMB(totalBytes)} MB`;
+					}
+
+					results[index] = new Blob(chunks);
+				}
+
+				let currentIndex = 0;
+				async function worker() {
+					while (currentIndex < fileParts.length) {
+						const index = currentIndex++;
+						await fetchPart(index);
+					}
+				}
+
+				const workers = [];
+				for (let i = 0; i < Math.min(concurrency, fileParts.length); i++) {
+					workers.push(worker());
+				}
+
+				await Promise.all(workers);
+
+				const mergedBlob = new Blob(results);
+				return URL.createObjectURL(mergedBlob);
+			}
+
+			function getParts(file, start, end) {
+				let parts = [];
+				for (let i = start; i <= end; i++) {
+					parts.push(file + ".part" + i);
+				}
+				return parts;
+			}
+
+			Promise.all([mergeFiles(getParts("build/bog.data", 1, 9))]).then(
+				([dataUrl]) => {
+					container.hidden = false;
+					var buildUrl = "build";
+					var loaderUrl = buildUrl + "/bog.loader.js";
+					var config = {
+						dataUrl: dataUrl,
+						frameworkUrl: buildUrl + "/bog.framework.js",
+						codeUrl: buildUrl + "/bog.wasm",
+						streamingAssetsUrl: "StreamingAssets",
+						companyName: "Team Cherry & Truffled",
+						productName: "Hollow Knight",
+						productVersion: "1.0",
+					};
+
+					if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+						var meta = document.createElement("meta");
+						meta.name = "viewport";
+						meta.content =
+							"width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+						document.getElementsByTagName("head")[0].appendChild(meta);
+						container.className = "unity-mobile";
+						canvas.className = "unity-mobile";
+					} else {
+						function resizeCanvas() {
+							canvas.width = window.innerWidth;
+							canvas.height = window.innerHeight;
+							canvas.style.width = window.innerWidth + "px";
+							canvas.style.height = window.innerHeight + "px";
+						}
+						resizeCanvas();
+						window.addEventListener("resize", resizeCanvas);
+					}
+
+					var script = document.createElement("script");
+					script.src = loaderUrl;
+					script.onload = () => {
+						createUnityInstance(canvas, config, (progress) => {})
+							.then(() => document.querySelector("#loading-text").remove())
+							.catch((message) => alert(message));
+					};
+					document.body.appendChild(script);
+				}
+			);
+		</script>
+	</body>
+</html>
